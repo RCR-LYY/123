@@ -1,0 +1,235 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/person/person",
+    "pages/detail/detail",
+    "pages/modify/modify",
+    "pages/order/order",
+    "pages/address/address",
+    "pages/test/test"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#f7982a",
+    "navigationBarTitleText": "个人中心",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#333",
+    "selectedColor": "#f7982a",
+    "backgroundColor": "#f6f6f6",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home_select.png"
+      },
+      {
+        "pagePath": "pages/person/person",
+        "text": "个人中心",
+        "iconPath": "images/me.png",
+        "selectedIconPath": "images/me_select.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}
+Page({
+  changeImage: function(e) {
+    wx.switchTab({
+      url: '/pages/person/person'
+    })
+  }
+Page({
+  data: {
+    gender: '男',
+    username: '张艺兴',
+    imgUrl: "/images/avatar.jpg"
+  },
+  changeAvatar: function() {
+    wx.chooseImage({
+      count: 1,
+      sizeType: ['original', 'compressed'],
+      sourceType: ['album', 'camera'],
+      success: res => {
+        // tempFilePath可以作为img标签的src属性显示图片
+        var tempFilePaths = res.tempFilePaths
+        this.setData({
+          imgUrl: tempFilePaths
+        })
+      }
+    })
+  },
+  <view>
+    <view class="fl">昵称</view>
+    <view class="rl">{{username}}<view class="arrow"></view></view>
+  </view>
+  <view>
+    <view class="fl">性别</view>
+    <view class="rl">{{gender}}<view class="arrow"></view></view>
+  </view>
+  <button bindtap="jump" type="primary">修改资料</button>
+jump: function(e) {
+    wx.navigateTo({
+      url: '/pages/modify/modify?username=' + encodeURIComponent(this.data.username) + '&gender=' + encodeURIComponent(this.data.gender)
+    })
+  }
+<form bindsubmit="formSubmit" report-submit="true">
+  <view class="section">
+    <view class="section-title">姓名：</view>
+    <view>
+      <input type="text" name="username" value="{{username}}" placeholder="请输入姓名" />
+    </view>
+  </view>
+  <view class="section">
+    <view class="section-title">性别：</view>
+    <view>
+      <radio-group name="gender">
+        <label><radio value="男" checked="{{gender==='男' ? 'checked' : ''}}" />男</label>
+        <label><radio value="女" checked="{{gender==='女' ? 'checked' : ''}}" />女</label>
+      </radio-group>
+    </view>
+  </view>
+  <button formType="submit" type="primary">保存</button>
+</form>
+Page({
+  data: {
+    username: '',
+    gender: '男'
+  },
+  onLoad: function(options) {
+    this.setData({
+      username: decodeURIComponent(options.username),
+      gender: decodeURIComponent(options.gender)
+    })
+  },
+  formSubmit: function(e) {
+    var formData = e.detail.value
+    var pages = getCurrentPages()
+    var prevPage = pages[pages.length - 2]
+    prevPage.setData({
+      username: formData.username,
+      gender: formData.gender
+    })
+    wx.navigateBack()
+  }
+})
+<view bindtap="order">订单物流查询
+    <image class="arrow" src="/images/arrow.png"></image>
+进入person.js文件，增加order()函数，实现跳转，具体代码如下：
+order: function(e) {
+    wx.navigateTo({
+      url: '/pages/order/order',
+    })
+  },
+
+执行完上述代码之后，将进入订单物流查询order.wxml文件，给“查询”按钮绑定search()函数，设计“订单查询”页面布局，具体代码如下：
+<view class="container">
+  <view class="title">欢迎进入快递查询系统</view>
+  <view class="section">
+    <view class="title">请选择快递公司：</view>
+    <picker class="input" bindchange="companyInput" value="{{index}}" range="{{com}}">
+      <view>{{com[index]}}</view>
+    </picker>
+  </view>
+  <view class="section">
+    <view class="title">运单号：</view>
+    <input class="input" type="number" bindinput="noInput" placeholder="请输入运单号" />
+  </view>
+  <button type="primary" bindtap="search"> 查询 </button>
+  <scroll-view scroll-y class="orderlist">
+    <view wx:for="{{expressInfo.result.list}}" wx:key="*this">
+      <text>【{{item.datetime}}】</text>{{item.remark}}
+    </view>
+  </scroll-view>
+</view>
+search: function() {
+    wx.showLoading({
+      title: '加载中',
+    })
+    var key = ''
+    wx.request({
+      url: 'http://v.juhe.cn/exp/index?key=' + key + '&com=' + this.data.company[this.data.index] + '&no=' + this.data.no,
+      method: 'GET',
+      header: {
+        'content-type': 'application/json' // 默认值
+      },
+      success: res => {
+        console.log(res.data);
+        this.setData({
+          expressInfo: res.data
+        })
+        wx.hideLoading()
+      }
+    })
+  },
+  noInput: function(e) {
+    this.setData({
+      no: e.detail.value
+    })
+  },
+   companyInput: function(e) {
+    this.setData({
+      index: e.detail.value
+    })
+  }
+})
+<view bindtap="address">选择收获地址
+    <image class="arrow" src="/images/arrow.png"></image>
+  </view>
+然后进入person.js文件，增加address(),具体代码如下：
+address: function() {
+    wx.navigateTo({
+      url: '/pages/address/address',
+    })
+  },
+<view class="list">
+  <view>
+    <view>收货人姓名</view>
+    <view>{{ addressInfo.userName }}</view>
+  </view>
+  <view>
+    <view class="head">邮编</view>
+    <view class="body">{{ addressInfo.postalCode }}</view>
+ </view>
+  <view>
+    <view class="head">地区</view>
+    <view class="body">{{ addressInfo.provinceName }} {{ addressInfo.cityName }} {{ addressInfo.countyName }}</view>
+  </view>
+  <view>
+    <view class="head">收货地址</view>
+    <view class="body">{{ addressInfo.detailInfo }}</view>
+  </view>
+  <view>
+    <view class="head">国家码</view>
+    <view class="body">{{ addressInfo.nationalCode }}</view>
+  </view>
+  <view>
+    <view class="head">手机号码</view>
+    <view class="body">{{ addressInfo.telNumber }}</view>
+  </view>
+</view>
+<view class="add" bindtap="chooseAddress">
+  <image class="left" src="/images/6.png" mode="widthFix" />
+  <view class="text">获取收货地址</view>
+  <image class="right" src="/images/right.png" mode="widthFix" />
+</view>
+Page({
+  data: {
+    addressInfo: null
+  },
+  chooseAddress() {
+    wx.chooseAddress({
+      success: res => {
+        this.setData({
+          addressInfo: res
+        })
+      },
+      fail: err => {
+        console.log(err)
+      }
+    })
+  }
+})
